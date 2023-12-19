@@ -649,6 +649,36 @@ public class Word implements Serializable, Cloneable {
 	}
 	
 	/**
+	 * Returns the index of the least significant bit set or {@code -1} if all bits are {@code 0}.
+	 * 
+	 * @return The index of the least significant bit set or {@code -1} if all bits are {@code 0}.
+	 */
+	public int findLSBSet() {
+		for (int i = 0; i < this.m_size; i++) {
+			if (this.getBoolean(i)) {
+				return i;
+			}
+		}
+		
+		return -1;
+	}
+	
+	/**
+	 * Returns the index of the most significant bit set or {@code -1} if all bits are {@code 0}.
+	 * 
+	 * @return The index of the most significant bit set or {@code -1} if all bits are {@code 0}.
+	 */
+	public int findMSBSet() {
+		for (int i = (this.m_size - 1); i >= 0; i--) {
+			if (this.getBoolean(i)) {
+				return i;
+			}
+		}
+		
+		return -1;
+	}
+	
+	/**
 	 * Executes a logical negation operation on this {@code Word}.
 	 * 
 	 * @return A reference to this {@code Word}.

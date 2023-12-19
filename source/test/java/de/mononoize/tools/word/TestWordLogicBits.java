@@ -3,6 +3,7 @@ package de.mononoize.tools.word;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -237,6 +238,82 @@ public class TestWordLogicBits extends AbstractTestWord {
 		@Order(2)
 		public void testResult() {
 			// TODO Implementation
+		}
+		
+	}
+	
+	@Nested
+	@Order(12)
+	class TestFindLSBSet extends AbstractTestWord {
+
+		@Test
+		@Order(1)
+		public void testResultZero() {
+			for (final int size : SIZES) {
+				final Word word = new Word(size);
+				
+				assertEquals(-1, word.findLSBSet());
+			}
+		}
+
+		@Test
+		@Order(1)
+		public void testResultRandom() {
+			for (final int size : SIZES) {
+				for (int i = 0; i < ITERATIONS; i++) {
+					final String value = getStringRandom(size);
+					final Word word = Word.of(value);
+					
+					assertEquals(findLSBSet(size, value), word.findLSBSet());
+				}
+			}
+		}
+		
+		private static int findLSBSet(final int size, final String value) {
+			final int index = StringUtils.lastIndexOf(value, '1');
+			if (index == -1) {
+				return -1;
+			} else {
+				return size - 1 - index;
+			}
+		}
+		
+	}
+	
+	@Nested
+	@Order(12)
+	class TestFindMSBSet extends AbstractTestWord {
+
+		@Test
+		@Order(1)
+		public void testResultZero() {
+			for (final int size : SIZES) {
+				final Word word = new Word(size);
+				
+				assertEquals(-1, word.findLSBSet());
+			}
+		}
+
+		@Test
+		@Order(1)
+		public void testResultRandom() {
+			for (final int size : SIZES) {
+				for (int i = 0; i < ITERATIONS; i++) {
+					final String value = getStringRandom(size);
+					final Word word = Word.of(value);
+					
+					assertEquals(findMSBSet(size, value), word.findMSBSet());
+				}
+			}
+		}
+		
+		private static int findMSBSet(final int size, final String value) {	
+			final int index = StringUtils.indexOf(value, '1');
+			if (index == -1) {
+				return -1;
+			} else {
+				return size - 1 - index;
+			}
 		}
 		
 	}
