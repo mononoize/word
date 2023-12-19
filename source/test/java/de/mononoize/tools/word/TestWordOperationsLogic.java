@@ -12,7 +12,7 @@ public class TestWordOperationsLogic extends AbstractTestWord {
 
 	@Nested
 	@Order(1)
-	class TestNot extends AbstractTestWord {
+	class TestNOT extends AbstractTestWord {
 		
 		private static final String[][] TRUTH_TABLE_NOT = new String[][] {
 			{VALUE00, VALUE11},
@@ -40,7 +40,7 @@ public class TestWordOperationsLogic extends AbstractTestWord {
 	
 	@Nested
 	@Order(2)
-	class TestAnd extends AbstractTestWord {
+	class TestAND extends AbstractTestWord {
 	
 		private static final String[][] TRUTH_TABLE_AND = new String[][] {
 			{VALUE00, VALUE00, VALUE00},
@@ -92,6 +92,58 @@ public class TestWordOperationsLogic extends AbstractTestWord {
 	
 	@Nested
 	@Order(3)
+	class TestNAND extends AbstractTestWord {
+	
+		private static final String[][] TRUTH_TABLE_NAND = new String[][] {
+			{VALUE00, VALUE00, VALUE11},
+			{VALUE00, VALUE01, VALUE11},
+			{VALUE00, VALUE10, VALUE11},
+			{VALUE00, VALUE11, VALUE11},
+			
+			{VALUE01, VALUE00, VALUE11},	
+			{VALUE01, VALUE01, VALUE10},
+			{VALUE01, VALUE10, VALUE11},		
+			{VALUE01, VALUE11, VALUE10},
+			
+			{VALUE10, VALUE00, VALUE11},
+			{VALUE10, VALUE01, VALUE11},
+			{VALUE10, VALUE10, VALUE01},
+			{VALUE10, VALUE11, VALUE01},
+			
+			{VALUE11, VALUE00, VALUE11},
+			{VALUE11, VALUE01, VALUE10},
+			{VALUE11, VALUE10, VALUE01},
+			{VALUE11, VALUE11, VALUE00}		
+		};
+		
+		@Test
+		@Order(1)
+		public void testValidation() {
+			assertThrows(NullPointerException.class, () -> new Word(1).nand(null));
+			assertThrows(IllegalArgumentException.class, () -> new Word(1).nand(new Word(2)));
+			assertThrows(IllegalArgumentException.class, () -> new Word(2).nand(new Word(1)));
+		}
+		
+		@Test
+		@Order(2)
+		public void testResult() {
+			for (final int size : SIZES) {
+				for (final String[] high : TRUTH_TABLE_NAND) {
+					for (final String[] low : TRUTH_TABLE_NAND) {
+						final Word operator01 = Word.of(getStringPattern(size, high[0], low[0]));
+						final Word operator02 = Word.of(getStringPattern(size, high[1], low[1]));
+						final Word expected = Word.of(getStringPattern(size, high[2], low[2]));
+
+						assertEquals(expected, operator01.nand(operator02));
+					}
+				}
+			}
+		}
+		
+	}
+	
+	@Nested
+	@Order(4)
 	class TestXOR extends AbstractTestWord {
 	
 		private static final String[][] TRUTH_TABLE_XOR = new String[][] {
@@ -143,7 +195,7 @@ public class TestWordOperationsLogic extends AbstractTestWord {
 	}
 	
 	@Nested
-	@Order(4)
+	@Order(5)
 	class TestOR extends AbstractTestWord {
 	
 		private static final String[][] TRUTH_TABLE_OR = new String[][] {
@@ -196,6 +248,58 @@ public class TestWordOperationsLogic extends AbstractTestWord {
 	
 	@Nested
 	@Order(5)
+	class TestNOR extends AbstractTestWord {
+	
+		private static final String[][] TRUTH_TABLE_NOR = new String[][] {
+			{VALUE00, VALUE00, VALUE11},
+			{VALUE00, VALUE01, VALUE10},
+			{VALUE00, VALUE10, VALUE01},
+			{VALUE00, VALUE11, VALUE00},
+			
+			{VALUE01, VALUE00, VALUE10},	
+			{VALUE01, VALUE01, VALUE10},
+			{VALUE01, VALUE10, VALUE00},		
+			{VALUE01, VALUE11, VALUE00},
+			
+			{VALUE10, VALUE00, VALUE01},
+			{VALUE10, VALUE01, VALUE00},
+			{VALUE10, VALUE10, VALUE01},
+			{VALUE10, VALUE11, VALUE00},
+			
+			{VALUE11, VALUE00, VALUE00},
+			{VALUE11, VALUE01, VALUE00},
+			{VALUE11, VALUE10, VALUE00},
+			{VALUE11, VALUE11, VALUE00}		
+		};
+		
+		@Test
+		@Order(1)
+		public void testValidation() {
+			assertThrows(NullPointerException.class, () -> new Word(1).nor(null));
+			assertThrows(IllegalArgumentException.class, () -> new Word(1).nor(new Word(2)));
+			assertThrows(IllegalArgumentException.class, () -> new Word(2).nor(new Word(1)));
+		}
+		
+		@Test
+		@Order(2)
+		public void testResult() {
+			for (final int size : SIZES) {
+				for (final String[] high : TRUTH_TABLE_NOR) {
+					for (final String[] low : TRUTH_TABLE_NOR) {
+						final Word operator01 = Word.of(getStringPattern(size, high[0], low[0]));
+						final Word operator02 = Word.of(getStringPattern(size, high[1], low[1]));
+						final Word expected = Word.of(getStringPattern(size, high[2], low[2]));
+										
+						assertEquals(expected, operator01.nor(operator02));
+					}
+				}
+			}
+		}
+		
+	}
+	
+	@Nested
+	@Order(7)
 	class TestSHLByOne extends AbstractTestWord {
 	
 		@Test
@@ -218,7 +322,7 @@ public class TestWordOperationsLogic extends AbstractTestWord {
 	}
 	
 	@Nested
-	@Order(6)
+	@Order(8)
 	class TestSHLByN extends AbstractTestWord {
 	
 		@Test
@@ -247,7 +351,7 @@ public class TestWordOperationsLogic extends AbstractTestWord {
 	}
 	
 	@Nested
-	@Order(7)
+	@Order(9)
 	class TestSHRByOne extends AbstractTestWord {
 	
 		@Test
@@ -270,7 +374,7 @@ public class TestWordOperationsLogic extends AbstractTestWord {
 	}
 	
 	@Nested
-	@Order(8)
+	@Order(10)
 	class TestSHRByN extends AbstractTestWord {
 	
 		@Test
@@ -299,7 +403,7 @@ public class TestWordOperationsLogic extends AbstractTestWord {
 	}
 		
 	@Nested
-	@Order(9)
+	@Order(11)
 	class TestROLByOne extends AbstractTestWord {
 	
 		@Test
@@ -322,7 +426,7 @@ public class TestWordOperationsLogic extends AbstractTestWord {
 	}
 	
 	@Nested
-	@Order(10)
+	@Order(12)
 	class TestROLByN extends AbstractTestWord {
 	
 		@Test
@@ -351,7 +455,7 @@ public class TestWordOperationsLogic extends AbstractTestWord {
 	}
 	
 	@Nested
-	@Order(11)
+	@Order(13)
 	class TestRORByOne extends AbstractTestWord {
 	
 		@Test
@@ -374,7 +478,7 @@ public class TestWordOperationsLogic extends AbstractTestWord {
 	}
 	
 	@Nested
-	@Order(12)
+	@Order(14)
 	class TestRORByN extends AbstractTestWord {
 	
 		@Test

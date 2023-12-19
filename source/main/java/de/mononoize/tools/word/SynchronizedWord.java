@@ -384,6 +384,13 @@ public class SynchronizedWord extends Word {
 			return super.and(that);
 		}
 	}
+	
+	@Override
+	public Word nand(final Word that) {
+		synchronized(mutex) {
+			return super.nand(that);
+		}
+	}
 
 	@Override
 	public Word xor(final Word that) {
@@ -396,6 +403,13 @@ public class SynchronizedWord extends Word {
 	public Word or(final Word that) {
 		synchronized(mutex) {
 			return super.or(that);
+		}
+	}
+	
+	@Override
+	public Word nor(final Word that) {
+		synchronized(mutex) {
+			return super.nor(that);
 		}
 	}
 

@@ -113,12 +113,22 @@ public final class ImmutableWord extends Word {
 	}
 	
 	@Override
+	public Word nand(final Word that) {
+		throw new UnsupportedOperationException();
+	}
+	
+	@Override
 	public Word xor(final Word that) {
 		throw new UnsupportedOperationException();
 	}
 	
 	@Override
 	public Word or(final Word that) {
+		throw new UnsupportedOperationException();
+	}
+	
+	@Override
+	public Word nor(final Word that) {
 		throw new UnsupportedOperationException();
 	}
 	

@@ -182,7 +182,7 @@ public class Word implements Serializable, Cloneable, Comparable<Word> {
 		}
 		
 		final Word that = (Word) object;
-	
+		
 		return new EqualsBuilder() //
 				.append(this.m_size, that.m_size) //
 				.append(this.m_data, that.m_data) //
@@ -826,6 +826,23 @@ public class Word implements Serializable, Cloneable, Comparable<Word> {
 	}
 	
 	/**
+	 * Executes a logical conjunction operation on this {@code Word} and negates the result.
+	 * 
+	 * @param that The word to be used.
+	 * @return A reference to this {@code Word}.
+	 */
+	public Word nand(final Word that) {
+		Validate.notNull(that, "Null not allowed.");
+		Validate.isTrue(this.m_size == that.m_size, "Different size Words not allowed.");
+		
+		if (this == that) {
+			return this.not();
+		}
+		
+		return this.and(that).not();
+	}
+	
+	/**
 	 * Executes a logical exclusive disjunction operation on this {@code Word}.
 	 * 
 	 * @param that The word to be used.
@@ -865,6 +882,23 @@ public class Word implements Serializable, Cloneable, Comparable<Word> {
 		}
 
 		return this;
+	}
+	
+	/**
+	 * Executes a logical inclusive disjunction operation on this {@code Word} and negates the result.
+	 * 
+	 * @param that The word to be used.
+	 * @return A reference to this {@code Word}.
+	 */
+	public Word nor(final Word that) {
+		Validate.notNull(that, "Null not allowed.");
+		Validate.isTrue(this.m_size == that.m_size, "Different size Words not allowed.");
+		
+		if (this == that) {
+			return this.not();
+		}
+			
+		return this.or(that).not();
 	}
 	
 	/**
