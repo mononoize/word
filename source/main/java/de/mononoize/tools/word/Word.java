@@ -41,11 +41,6 @@ public class Word implements Serializable, Cloneable, Comparable<Word> {
 	protected static final int ELEMENT_ADDRESS_BITS = 6;
 	
 	/**
-	 * The bit mask to calculate {@code (n % ELEMENT_SIZE)} which is equal to {@code (n & (ELEMENT_SIZE - 1))}.
-	 */
-	protected static final int ELEMENT_ADDRESS_MOD_MASK = ELEMENT_SIZE - 1;
-	
-	/**
 	 * The (internal) data storage element value that has all bits set to {@code 0}.
 	 */
 	protected static final long ZERO = 0L;
@@ -71,6 +66,11 @@ public class Word implements Serializable, Cloneable, Comparable<Word> {
 	protected final int m_size;
 	
 	/**
+	 * A mask to replace {@code x % this.m_size} with {@code x & this.m_sizeModMask}.
+	 */
+	protected final int m_sizeModMask;
+	
+	/**
 	 * Constructs a new {@code Word} with the given number of bits. Initially, all bits are set to {@code 0}.
 	 * 
 	 * @param size The number of bits to be used.
@@ -79,6 +79,7 @@ public class Word implements Serializable, Cloneable, Comparable<Word> {
 		Validate.isTrue(size > 0, "The size must be at least 1.");
 		
 		this.m_size = size;
+		this.m_sizeModMask = this.m_size - 1;
 		this.m_data = new long[((this.m_size - 1) >>> ELEMENT_ADDRESS_BITS) + 1];
 	}
 	
@@ -200,7 +201,20 @@ public class Word implements Serializable, Cloneable, Comparable<Word> {
 		if (this.equals(that)) {
 			return 0;
 		} else {
-			return this.getBoolean(Word.of(this).xor(that).findLastOne()) ? 1 : -1;
+			final long[] temp = new long[this.m_data.length];
+			
+			for (int i = 0; i < this.m_data.length; i++) {
+				temp[i] = this.m_data[i] ^ that.m_data[i];
+			}
+		
+			int result = 0;
+			for (int i = (this.m_size - 1); i >= 0; i--) {
+				if ((temp[i >>> ELEMENT_ADDRESS_BITS] & (ONE << i)) != 0) {
+					result = ((this.m_data[i >>> ELEMENT_ADDRESS_BITS] & (ONE << i)) != 0) ? 1 : -1;
+					break;
+				}
+			}
+			return result;
 		}
 	}
 		
@@ -450,9 +464,7 @@ public class Word implements Serializable, Cloneable, Comparable<Word> {
 	 * @return The bit at the given index.
 	 */
 	public long get(final int index) {
-		Validate.inclusiveBetween(0, (this.m_size - 1), index, "Index out of bounds.");
-
-		return ((this.m_data[index >>> ELEMENT_ADDRESS_BITS] & (ONE << (index & ELEMENT_ADDRESS_MOD_MASK))) == 0) ? ZERO : ONE;
+			return this.getBoolean(index) ? ONE : ZERO;
 	}
 
 	/**
@@ -461,7 +473,7 @@ public class Word implements Serializable, Cloneable, Comparable<Word> {
 	 * @return The highest bit.
 	 */
 	public long get() {
-		return this.get(this.m_size - 1);
+		return this.getBoolean() ? ONE : ZERO;
 	}
 	
 	/**
@@ -471,7 +483,9 @@ public class Word implements Serializable, Cloneable, Comparable<Word> {
 	 * @return The bit at the given index as a {@code boolean}.
 	 */
 	public boolean getBoolean(final int index) {
-		return (this.get(index) == 1);
+		Validate.inclusiveBetween(0, (this.m_size - 1), index, "Index out of bounds.");
+		
+		return ((this.m_data[index >>> ELEMENT_ADDRESS_BITS] & (ONE << index)) != 0);
 	}
 		
 	/**
@@ -480,7 +494,7 @@ public class Word implements Serializable, Cloneable, Comparable<Word> {
 	 * @return The highest bit as a {@code boolean}.
 	 */
 	public boolean getBoolean() {
-		return (this.get() == 1);
+		return this.getBoolean(this.m_size - 1);
 	}
 	
 	/**
@@ -492,7 +506,7 @@ public class Word implements Serializable, Cloneable, Comparable<Word> {
 	public Word set(final int index) {
 		Validate.inclusiveBetween(0, (this.m_size - 1), index, "Index out of bounds.");
 		
-		this.m_data[index >>> ELEMENT_ADDRESS_BITS] |= (ONE << (index & ELEMENT_ADDRESS_MOD_MASK));
+		this.m_data[index >>> ELEMENT_ADDRESS_BITS] |= (ONE << index);
 
 		return this;
 	}
@@ -547,7 +561,7 @@ public class Word implements Serializable, Cloneable, Comparable<Word> {
 	public Word clear(final int index) {
 		Validate.inclusiveBetween(0, (this.m_size - 1), index , "Index out of bounds.");
 		
-		this.m_data[index >>> ELEMENT_ADDRESS_BITS] &= ~(ONE << (index & ELEMENT_ADDRESS_MOD_MASK));
+		this.m_data[index >>> ELEMENT_ADDRESS_BITS] &= ~(ONE << index);
 
 		return this;
 	}
@@ -610,7 +624,7 @@ public class Word implements Serializable, Cloneable, Comparable<Word> {
 	public Word flip(final int index) {
 		Validate.inclusiveBetween(0, (this.m_size - 1), index, "Index out of bounds.");
 		
-		this.m_data[index >>> ELEMENT_ADDRESS_BITS] ^= (ONE << (index & ELEMENT_ADDRESS_MOD_MASK));
+		this.m_data[index >>> ELEMENT_ADDRESS_BITS] ^= (ONE << index);
 		
 		return this;
 	}
@@ -670,7 +684,7 @@ public class Word implements Serializable, Cloneable, Comparable<Word> {
 	 */
 	public int findFirstOne() {
 		for (int i = 0; i < this.m_size; i++) {
-			if (this.getBoolean(i)) {
+			if (((this.m_data[i >>> ELEMENT_ADDRESS_BITS] & (ONE << i)) != 0)) {
 				return i;
 			}
 		}
@@ -685,7 +699,7 @@ public class Word implements Serializable, Cloneable, Comparable<Word> {
 	 */
 	public int findLastOne() {
 		for (int i = (this.m_size - 1); i >= 0; i--) {
-			if (this.getBoolean(i)) {
+			if (((this.m_data[i >>> ELEMENT_ADDRESS_BITS] & (ONE << i)) != 0)) {
 				return i;
 			}
 		}
@@ -700,7 +714,7 @@ public class Word implements Serializable, Cloneable, Comparable<Word> {
 	 */
 	public int findFirstZero() {
 		for (int i = 0; i < this.m_size; i++) {
-			if (!this.getBoolean(i)) {
+			if (((this.m_data[i >>> ELEMENT_ADDRESS_BITS] & (ONE << i)) == 0)) {
 				return i;
 			}
 		}
@@ -715,7 +729,7 @@ public class Word implements Serializable, Cloneable, Comparable<Word> {
 	 */
 	public int findLastZero() {
 		for (int i = (this.m_size - 1); i >= 0; i--) {
-			if (!this.getBoolean(i)) {
+			if (((this.m_data[i >>> ELEMENT_ADDRESS_BITS] & (ONE << i)) == 0)) {
 				return i;
 			}
 		}
@@ -854,128 +868,208 @@ public class Word implements Serializable, Cloneable, Comparable<Word> {
 	}
 	
 	/**
-	 * Executes a logical shift-left operation on this {@code Word} by one step.
+	 * Executes a logical shift-left operation on this {@code Word} with an offset of one.
 	 * 
 	 * @return A reference to this {@code Word}.
 	 */
 	public Word shl() {
-		for (int i = (this.m_data.length - 1); i > 0; i--) {
-			this.m_data[i] <<= 1;
-			this.m_data[i] |= (this.m_data[i - 1] >>> (ELEMENT_SIZE - 1));
-		}
-		this.m_data[0] <<= 1;
-		
-		return this;
+		return this.shl(1);
 	}
 	
 	/**
-	 * Executes a logical shift-left operation on this {@code Word} by the given steps.
+	 * Executes a logical shift-left operation on this {@code Word}using the given offset.
 	 * 
-	 * @param steps The shift-left steps to be used.
+	 * @param offset The offset to be used.
 	 * @return A reference to this {@code Word}.
 	 */
-	public Word shl(final int steps) {
-		Validate.isTrue(steps >= 0, "Negative steps not allowed.");
+	public Word shl(final int offset) {
+		Validate.isTrue(offset >= 0, "A negative offset is not allowed.");
+
+		// There is nothing to do when the offset is zero.
+		if (offset == 0) {
+			return this;		
+		}
 		
-		for (int i = 0; i < steps; i++) {
-			this.shl();
+		// All bits can be set to zero when the offset is equal or greater than the size of this Word.
+		if (offset >= this.m_size) {
+			return this.clear();
+		}
+				
+		final long[] target = new long[this.m_data.length];
+		
+		// The following loop iterates over all bits of this Word (i.e. the source array) starting at index 0 (i.e. the
+	    // least significant bit). All zeros of the source array are skipped as the result array is already initialized
+		// to zero. The control-variable i points to the current bit of the source array whereas the control-variable j
+		// points to the current bit of the target array.
+				
+		final int sourceStart = 0;
+		final int sourceEnd = (this.m_size - offset);
+		final int targetStart = offset;
+				
+		for(int i = sourceStart, j = targetStart; i < sourceEnd ; i++, j++) {
+			// Skip zeros.
+			if ((this.m_data[i >>> ELEMENT_ADDRESS_BITS] & (ONE << i)) != 0) {
+				target[j >>> ELEMENT_ADDRESS_BITS] |= (ONE << j);
+			}
+		}
+		
+		for (int i = 0; i < this.m_data.length; i++) {
+			this.m_data[i] = target[i];
 		}
 		
 		return this;
 	}
 	
 	/**
-	 * Executes a logical shift-right operation on this {@code Word} by one step.
+	 * Executes a logical shift-right operation on this {@code Word} with an offset of one.
 	 * 
 	 * @return A reference to this {@code Word}.
 	 */
 	public Word shr() {
-		for (int i = 0; i < (this.m_data.length - 1); i++) {
-			this.m_data[i] >>>= 1;
-			this.m_data[i] |= (this.m_data[i + 1] << (ELEMENT_SIZE - 1));
-		}
-		this.m_data[this.m_data.length - 1] >>>= 1;
-		
-		return this;
+		return this.shr(1);
 	}
 
 	/**
-	 * Executes a logical shift-right operation on this {@code Word} by the given steps.
+	 * Executes a logical shift-right operation on this {@code Word} using the given offset.
 	 * 
-	 * @param steps The shift-right steps to be used.
+	 * @param offset The offset to be used.
 	 * @return A reference to this {@code Word}.
 	 */
-	public Word shr(final int steps) {
-		Validate.isTrue(steps >= 0, "Negative steps not allowed.");
+	public Word shr(final int offset) {
+		Validate.isTrue(offset >= 0, "A negative offset is not allowed.");
 		
-		for (int i = 0; i < steps; i++) {
-			this.shr();
+		// There is nothing to do when the offset is zero.
+		if (offset == 0) {
+			return this;
+		}
+		
+		// All bits can be set to zero when the offset is equal or greater than the size of this Word.
+		if (offset >= this.m_size) {
+			return this.clear();
+		}
+		
+		final long[] target = new long[this.m_data.length];
+	
+		// The following loop iterates over all bits of this Word (i.e. the source array) starting at index 0 (i.e. the
+	    // least significant bit). All zeros of the source array are skipped as the result array is already initialized
+		// to zero. The control-variable i points to the current bit of the source array whereas the control-variable j
+		// points to the current bit of the target array.
+		
+		final int sourceStart = offset;
+		final int sourceEnd = this.m_size;
+		final int targetStart = 0;
+		
+		for(int i = sourceStart, j = targetStart; i < sourceEnd; i++, j++) {
+			// Skip zeros.
+			if ((this.m_data[i >>> ELEMENT_ADDRESS_BITS] & (ONE << i)) != 0) {
+				target[j >>> ELEMENT_ADDRESS_BITS] |= (ONE << j);
+			}
+		}
+		
+		for (int i = 0; i < this.m_data.length; i++) {
+			this.m_data[i] = target[i];
 		}
 		
 		return this;
 	}
 	
 	/**
-	 * Executes a logical rotate-left operation on this {@code Word} by one step.
+	 * Executes a logical rotate-left operation on this {@code Word} with an offset of one.
 	 * 
 	 * @return A reference to this {@code Word}.
 	 */
 	public Word rol() {	
-		final long carry = this.get(this.m_size - 1);
-		this.shl();
-		if (carry > 0) {
-			this.set(0);
-		} else {
-			this.clear(0);
-		}
-
-		return this;
+		return this.rol(1);
 	}	
 	
 	/**
-	 * Executes a logical rotate-left operation on this {@code Word} by the given steps.
+	 * Executes a logical rotate-left operation on this {@code Word} using the given offset.
 	 * 
-	 * @param steps The rotate-left steps to be used.
+	 * @param offset The offset to be used.
 	 * @return A reference to this {@code Word}.
 	 */
-	public Word rol(final int steps) {
-		Validate.isTrue(steps >= 0, "Negative steps not allowed.");
+	public Word rol(final int offset) {
+		Validate.isTrue(offset >= 0, "A negative offset is not allowed.");
+				
+		// There is nothing to do when the offset is zero.
+		if (offset == 0) {
+			return this;		
+		}
+
+		// The following loop iterates over all bits of this Word (i.e. the source array) starting at index 0 (i.e. the
+	    // least significant bit). All zeros of the source array are skipped as the result array is already initialized
+		// to zero. The control-variable i points to the current bit of the source array whereas the control-variable j
+		// points to the current bit of the target array.
+		//
+		// Multiple (unnecessary) rotations of the whole Word are prevented by initializing the control-variable j with
+		// the remainder of the division with the Words size.
 		
-		for (int i = 0; i < steps; i++) {
-			this.rol();
+		final long[] target = new long[this.m_data.length];
+		
+		final int sourceStart = 0;
+		final int sourceEnd = this.m_size;
+		final int targetStart = (this.m_size + offset) & this.m_sizeModMask;
+		
+		for(int i = sourceStart, j = targetStart; i <sourceEnd; i++, j = (++j & this.m_sizeModMask)) {
+			// Skip zeros.
+			if ((this.m_data[i >>> ELEMENT_ADDRESS_BITS] & (ONE << i)) != 0) {
+				target[j >>> ELEMENT_ADDRESS_BITS] |= (ONE << j);
+			}
+		}
+		
+		for (int i = 0; i < this.m_data.length; i++) {
+			this.m_data[i] = target[i];
 		}
 		
 		return this;
 	}
 		
 	/**
-	 * Executes a logical rotate-right operation on this {@code Word} by one step.
+	 * Executes a logical rotate-right operation on this {@code Word} with an offset of one.
 	 * 
 	 * @return A reference to this {@code Word}.
 	 */
 	public Word ror() {
-		final long carry = this.get(0);
-		this.shr();
-		if (carry > 0) {
-			this.set(this.m_size - 1);
-		} else {
-			this.clear(this.m_size- 1);
-		}
-		
-		return this;
+		return this.ror(1);
 	}
 	
 	/**
-	 * Executes a logical rotate-right operation on this {@code Word} by the given steps.
+	 * Executes a logical rotate-right operation on this {@code Word} using the given offset.
 	 * 
-	 * @param steps The rotate-right steps to be used.
+	 * @param offset The offset to be used.
 	 * @return A reference to this {@code Word}.
 	 */
-	public Word ror(final int steps) {
-		Validate.isTrue(steps >= 0, "Negative steps not allowed.");
+	public Word ror(final int offset) {
+		Validate.isTrue(offset >= 0, "A negative offset is not allowed.");
 		
-		for (int i = 0; i < steps; i++) {
-			this.ror();
+		// There is nothing to do when the offset is zero.
+		if (offset == 0) {
+			return this;		
+		}
+
+		// The following loop iterates over all bits of this Word (i.e. the source array) starting at index 0 (i.e. the
+	    // least significant bit). All zeros of the source array are skipped as the result array is already initialized
+		// to zero. The control-variable i points to the current bit of the source array whereas the control-variable j
+		// points to the current bit of the target array.
+		//
+		// Multiple (unnecessary) rotations of the whole Word are prevented by initializing the control-variable j with
+		// the remainder of the division with the Words size.
+		
+		final long[] target = new long[this.m_data.length];
+		
+		final int sourceStart = 0;
+		final int sourceEnd = this.m_size;
+		final int targetStart = (this.m_size - offset) & this.m_sizeModMask;
+		
+		for(int i = sourceStart, j = targetStart; i < sourceEnd; i++, j = (++j & this.m_sizeModMask)) {
+			// Skip zeros.
+			if ((this.m_data[i >>> ELEMENT_ADDRESS_BITS] & (ONE << i)) != 0) {
+				target[j >>> ELEMENT_ADDRESS_BITS] |= (ONE << j);
+			}
+		}
+		
+		for (int i = 0; i < this.m_data.length; i++) {
+			this.m_data[i] = target[i];
 		}
 		
 		return this;
