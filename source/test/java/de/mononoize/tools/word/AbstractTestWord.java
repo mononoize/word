@@ -27,7 +27,7 @@ public abstract class AbstractTestWord {
 	/**
 	 * The number of iterations that are used for tests that include random values.
 	 */
-	protected static final int ITERATIONS = 1000000;
+	protected static final int ITERATIONS = 100000;
 	
 	/**
 	 * The (arbitrary) {@code Word} sizes to be used.

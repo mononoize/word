@@ -80,7 +80,7 @@ public class TestWordTypeInteger extends AbstractTestWord {
 		@Order(1)
 		public void testResultZero() {
 			for (final int size : SIZES) {
-				assertEquals(ZERO_VALUE, new Word(size).toInteger());
+				assertWord(size, ZERO_VALUE, new Word(size));
 			}
 		}
 			
@@ -91,7 +91,7 @@ public class TestWordTypeInteger extends AbstractTestWord {
 				for (int i = 0; i < ITERATIONS; i++) {
 					final int randomValue = (int) RANDOM.nextLong();
 					
-					assertEquals(randomValue, new Word(size).setValue(randomValue).toInteger());
+					assertWord(size, randomValue, new Word(size).setValue(randomValue));
 				}
 			}
 		}

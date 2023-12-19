@@ -80,7 +80,7 @@ public class TestWordTypeChar extends AbstractTestWord {
 		@Order(1)
 		public void testResultZero() {
 			for (final int size : SIZES) {
-				assertEquals(ZERO_VALUE, new Word(size).toChar());
+				assertWord(size, ZERO_VALUE, new Word(size));
 			}
 		}
 			
@@ -91,7 +91,7 @@ public class TestWordTypeChar extends AbstractTestWord {
 				for (int i = 0; i < ITERATIONS; i++) {
 					final char randomValue = (char) RANDOM.nextLong();
 					
-					assertEquals(randomValue, new Word(size).setValue(randomValue).toChar());
+					assertWord(size, randomValue, new Word(size).setValue(randomValue));
 				}
 			}
 		}

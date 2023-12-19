@@ -80,7 +80,7 @@ public class TestWordTypeByte extends AbstractTestWord {
 		@Order(1)
 		public void testResultZero() {
 			for (final int size : SIZES) {
-				assertEquals(ZERO_VALUE, new Word(size).toByte());
+				assertWord(size, ZERO_VALUE, new Word(size));
 			}
 		}
 			
@@ -91,7 +91,7 @@ public class TestWordTypeByte extends AbstractTestWord {
 				for (int i = 0; i < ITERATIONS; i++) {
 					final byte randomValue = (byte) RANDOM.nextLong();
 					
-					assertEquals(randomValue, new Word(size).setValue(randomValue).toByte());
+					assertWord(size, randomValue, new Word(size).setValue(randomValue));
 				}
 			}
 		}

@@ -64,7 +64,7 @@ public class TestWordTypeLong extends AbstractTestWord {
 			for (final int size : SIZES) {
 				for (int i = 0; i < ITERATIONS; i++) {
 					final long randomValue = (long) RANDOM.nextLong();
-					
+						
 					assertWord(size, randomValue, new Word(size).setValue(randomValue));
 				}
 			}
@@ -80,7 +80,7 @@ public class TestWordTypeLong extends AbstractTestWord {
 		@Order(1)
 		public void testResultZero() {
 			for (final int size : SIZES) {
-				assertEquals(ZERO_VALUE, new Word(size).toLong());
+				assertWord(size, ZERO_VALUE, new Word(size));
 			}
 		}
 			
@@ -91,7 +91,7 @@ public class TestWordTypeLong extends AbstractTestWord {
 				for (int i = 0; i < ITERATIONS; i++) {
 					final long randomValue = (long) RANDOM.nextLong();
 					
-					assertEquals(randomValue, new Word(size).setValue(randomValue).toLong());
+					assertWord(size, randomValue, new Word(size).setValue(randomValue));
 				}
 			}
 		}
