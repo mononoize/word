@@ -200,11 +200,10 @@ public class Word implements Serializable, Cloneable, Comparable<Word> {
 		if (this.equals(that)) {
 			return 0;
 		} else {
-			return this.getBoolean(Word.of(this).xor(that).findMSBSet()) ? 1 : -1;
+			return this.getBoolean(Word.of(this).xor(that).findLastOne()) ? 1 : -1;
 		}
 	}
-	
-	
+		
 	@Override
 	public String toString() {
 		return toString(this.m_size, this.m_data);	
@@ -669,7 +668,7 @@ public class Word implements Serializable, Cloneable, Comparable<Word> {
 	 * 
 	 * @return The index of the least significant bit set or {@code -1} if all bits are {@code 0}.
 	 */
-	public int findLSBSet() {
+	public int findFirstOne() {
 		for (int i = 0; i < this.m_size; i++) {
 			if (this.getBoolean(i)) {
 				return i;
@@ -684,9 +683,39 @@ public class Word implements Serializable, Cloneable, Comparable<Word> {
 	 * 
 	 * @return The index of the most significant bit set or {@code -1} if all bits are {@code 0}.
 	 */
-	public int findMSBSet() {
+	public int findLastOne() {
 		for (int i = (this.m_size - 1); i >= 0; i--) {
 			if (this.getBoolean(i)) {
+				return i;
+			}
+		}
+		
+		return -1;
+	}
+	
+	/**
+	 * Returns the index of the least significant bit not set or {@code -1} if all bits are {@code 1}.
+	 * 
+	 * @return The index of the least significant bit not set or {@code -1} if all bits are {@code 1}.
+	 */
+	public int findFirstZero() {
+		for (int i = 0; i < this.m_size; i++) {
+			if (!this.getBoolean(i)) {
+				return i;
+			}
+		}
+		
+		return -1;
+	}
+	
+	/**
+	 * Returns the index of the most significant bit not set or {@code -1} if all bits are {@code 1}.
+	 * 
+	 * @return The index of the most significant bit not set or {@code -1} if all bits are {@code 1}.
+	 */
+	public int findLastZero() {
+		for (int i = (this.m_size - 1); i >= 0; i--) {
+			if (!this.getBoolean(i)) {
 				return i;
 			}
 		}
@@ -699,14 +728,59 @@ public class Word implements Serializable, Cloneable, Comparable<Word> {
      *
      * @return The number of bits that are set to {@code 1}.
      */
-    public int cardinality() {
+    public int countOnes() {
     	int result = 0;
     	for (final long element : this.m_data) {
     		result += Long.bitCount(element);
     	}
         return result;
     }
+    
+    /**
+     * Returns the number of bits that are set to {@code 0}.
+     *
+     * @return The number of bits that are set to {@code 0}.
+     */
+    public int countZeros() {
+    	return (this.m_size - this.countOnes());
+    }
 	
+    /**
+     * Returns the number of leading bits that are set to {@code 1}.
+     *
+     * @return The number of leading bits that are set to {@code 1}.
+     */
+    public int countLeadingOnes() {
+    	return (this.findLastZero() != -1) ? this.m_size - 1 - this.findLastZero() : this.m_size;
+    }
+    
+    /**
+     * Returns the number of leading bits that are set to {@code 0}.
+     *
+     * @return The number of leading bits that are set to {@code 0}.
+     */
+    public int countLeadingZeros() {
+    	return (this.findLastOne() != -1) ? this.m_size - 1 - this.findLastOne() : this.m_size;
+    }
+    
+    /**
+     * Returns the number of trailing bits that are set to {@code 1}.
+     *
+     * @return The number of trailing bits that are set to {@code 1}.
+     */
+    public int countTrailingOnes() {
+    	return (this.findFirstZero() != -1) ? this.findFirstZero() : this.m_size;
+    }
+    
+    /**
+     * Returns the number of trailing bits that are set to {@code 0}.
+     *
+     * @return The number of trailing bits that are set to {@code 0}.
+     */
+    public int countTrailingZeros() {
+    	return (this.findFirstOne() != -1) ? this.findFirstOne() : this.m_size;
+    }
+    
 	/**
 	 * Executes a logical negation operation on this {@code Word}.
 	 * 
