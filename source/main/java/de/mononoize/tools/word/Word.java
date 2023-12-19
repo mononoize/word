@@ -2,6 +2,10 @@ package de.mononoize.tools.word;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.Spliterator;
+import java.util.function.LongConsumer;
+import java.util.stream.LongStream;
+import java.util.stream.StreamSupport;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -100,7 +104,7 @@ public class Word implements Serializable, Cloneable, Comparable<Word> {
 		Validate.notNull(value, "The string must not be null.");
 		Validate.notEmpty(value, "The string must not be empty.");
 		Validate.isTrue(StringUtils.containsOnly(value, '0', '1'), "The value contains invalid characters.");
-		
+
 		return new Word(value.length()).setValue(value);
 	}
 	
@@ -901,6 +905,89 @@ public class Word implements Serializable, Cloneable, Comparable<Word> {
 		}
 		
 		return this;
+	}
+	
+	/**
+	 * Returns a spliterator over the bits of this {@code Word}.
+	 * 
+	 * @return A spliterator over the bits of this {@code Word}.
+	 */
+	public Spliterator.OfLong spliterator() {
+		
+		/**
+		 * A spliterator over the individual bits of this{@code Word}. 
+		 */
+		final class WordSpliterator implements Spliterator.OfLong {
+
+			/**
+			 *  The upper boundary.
+			 */
+			private final int m_fence;
+			
+			/**
+			 * The current index.
+			 */
+			private int m_origin;
+				
+			/**
+			 * Constructs a new {@code WordSpliterator}.
+			 * 
+			 * @param origin The origin index to be used.
+			 * @param fence The fence index to be used.
+			 */
+			public WordSpliterator(final int origin, final int fence) {
+				this.m_origin = origin;
+				this.m_fence = fence;
+			}
+
+			@Override
+			public int characteristics() {
+				return Spliterator.NONNULL | Spliterator.ORDERED | Spliterator.SIZED | Spliterator.SUBSIZED;
+			}
+
+			@Override
+			public long estimateSize() {
+				return (this.m_fence - this.m_origin);
+			}
+			
+			@Override
+			public Spliterator.OfLong trySplit() {
+				int low = this.m_origin;
+				int mid = ((low + this.m_fence) >>> 1) & ~1;
+
+				if (low < mid) {
+					this.m_origin = mid;
+					return new WordSpliterator(low, mid);
+				} else {
+					return null;
+				}
+			}
+			
+			@Override
+			public boolean tryAdvance(final LongConsumer action) {
+				Validate.notNull(action, "The action must not be null.");
+				
+				if (this.m_origin < this.m_fence) {
+					action.accept(Word.this.get(this.m_origin++));
+					return true;
+				} else {
+					return false;
+				}
+			}
+			
+		}
+		
+		return new WordSpliterator(0, this.m_size);
+	}
+	
+	/**
+	 * Returns a sequential stream of bits of this {@code Word}. The bits are returned from the least significant bit to
+	 * the most significant bit.
+	 * 
+	 * @return A sequential stream of bits of this {@code Word}.
+	 */
+	public LongStream stream() {
+		return StreamSupport.longStream(this.spliterator(), false);
 	}
 
 }
