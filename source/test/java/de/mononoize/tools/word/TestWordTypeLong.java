@@ -1,5 +1,7 @@
 package de.mononoize.tools.word;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -62,8 +64,57 @@ public class TestWordTypeLong extends AbstractTestWord {
 			for (final int size : SIZES) {
 				for (int i = 0; i < ITERATIONS; i++) {
 					final long randomValue = (long) RANDOM.nextLong();
+					
 					assertWord(size, randomValue, new Word(size).setValue(randomValue));
 				}
+			}
+		}
+		
+	}
+	
+	@Nested
+	@Order(3)
+	class TestToLong extends AbstractTestWord {
+		
+		@Test
+		@Order(1)
+		public void testResultZero() {
+			for (final int size : SIZES) {
+				assertEquals(ZERO_VALUE, new Word(size).toLong());
+			}
+		}
+			
+		@Test
+		@Order(2)
+		public void testResultRandom() {
+			for (final int size : SIZES) {
+				for (int i = 0; i < ITERATIONS; i++) {
+					final long randomValue = (long) RANDOM.nextLong();
+					
+					assertEquals(randomValue, new Word(size).setValue(randomValue).toLong());
+				}
+			}
+		}
+		
+	}
+	
+	@Nested
+	@Order(4)
+	class TestToString extends AbstractTestWord {
+		
+		@Test
+		@Order(1)
+		public void testResultZero() {			
+			assertEquals(getStringZero(SIZE), Word.toString(ZERO_VALUE));
+		}
+			
+		@Test
+		@Order(2)
+		public void testResultHardcoded() {
+			for (int i = 0; i < ITERATIONS; i++) {
+				final String randomValue = getStringRandom(SIZE);
+				
+				assertEquals(randomValue, Word.toString(Word.of(randomValue).toLong()));
 			}
 		}
 		
