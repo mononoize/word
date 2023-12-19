@@ -30,7 +30,7 @@ public abstract class AbstractTestWord {
 	protected static final int ITERATIONS = 1000000;
 	
 	/**
-	 * The {@code Word} sizes to be used.
+	 * The (arbitrary) {@code Word} sizes to be used.
 	 */
 	protected static final int[] SIZES = {32, 64, 128, 256};
 	
@@ -204,10 +204,10 @@ public abstract class AbstractTestWord {
 	}
 
 	/**
-	 * Returns the string representation of a bit sequence with the given size where the upper half is a repetition of
+	 * Returns the string representation of a bit sequesizence with the given size where the upper half is a repetition of
 	 * the high pattern and the lower half is a repetition of the low pattern.
 	 * 
-	 * @param size THRe size to be used.
+	 * @param size The size to be used.
 	 * @param high The upper half pattern.
 	 * @param low The lower half pattern.
 	 * @return The string representation of a bit sequence with the given size where the upper half is a repetition of
