@@ -1,0 +1,10 @@
+target/
+
+.settings/
+
+*.tmp
+*.bak
+
+.metadata
+.project
+.classpath
