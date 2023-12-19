@@ -21,7 +21,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
  *  
  * @author Alexander Mattes
  */
-public class Word implements Serializable, Cloneable {
+public class Word implements Serializable, Cloneable, Comparable<Word> {
 	
 	@Serial
 	private static final long serialVersionUID = 190554597376876918L;
@@ -188,6 +188,18 @@ public class Word implements Serializable, Cloneable {
 	public Object clone() {
 		return Word.of(this);
 	}
+
+	@Override
+	public int compareTo(final Word that) {
+		Validate.notNull(that, "The word must not be null.");
+	
+		if (this.equals(that)) {
+			return 0;
+		} else {
+			return this.getBoolean(Word.of(this).xor(that).findMSBSet()) ? 1 : -1;
+		}
+	}
+	
 	
 	@Override
 	public String toString() {
@@ -890,5 +902,5 @@ public class Word implements Serializable, Cloneable {
 		
 		return this;
 	}
-	
+
 }
