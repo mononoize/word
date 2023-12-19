@@ -678,6 +678,19 @@ public class Word implements Serializable, Cloneable {
 		return -1;
 	}
 	
+    /**
+     * Returns the number of bits that are set to {@code 1}.
+     *
+     * @return The number of bits that are set to {@code 1}.
+     */
+    public int cardinality() {
+    	int result = 0;
+    	for (final long element : this.m_data) {
+    		result += Long.bitCount(element);
+    	}
+        return result;
+    }
+	
 	/**
 	 * Executes a logical negation operation on this {@code Word}.
 	 * 

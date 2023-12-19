@@ -281,7 +281,7 @@ public class TestWordLogicBits extends AbstractTestWord {
 	}
 	
 	@Nested
-	@Order(12)
+	@Order(13)
 	class TestFindMSBSet extends AbstractTestWord {
 
 		@Test
@@ -316,6 +316,35 @@ public class TestWordLogicBits extends AbstractTestWord {
 			}
 		}
 		
+	}
+		
+	@Nested
+	@Order(14)
+	class TestCardinality extends AbstractTestWord {
+		
+		@Test
+		@Order(1)
+		public void testResultZero() {
+			for (final int size : SIZES) {
+				final Word word = new Word(size);
+				
+				assertEquals(0, word.cardinality());
+			}
+		}
+
+		@Test
+		@Order(1)
+		public void testResultRandom() {
+			for (final int size : SIZES) {
+				for (int i = 0; i < ITERATIONS; i++) {
+					final String value = getStringRandom(size);
+					final Word word = Word.of(value);
+					
+					assertEquals(StringUtils.countMatches(value, '1'), word.cardinality());
+				}
+			}
+		}
+
 	}
 	
 	private static long getValue(final String expected, final int size, final int index) {
