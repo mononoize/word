@@ -196,7 +196,7 @@ public abstract class AbstractTestWord {
 	protected static String getStringRandom(final int size) {
 		final StringBuilder result = new StringBuilder(getStringZero(size));
 		
-		for (int i = 0; i < RANDOM.nextInt(size); i++) {
+		for (int i = 0; i < (RANDOM.nextInt(size) + 1); i++) {
 			result.setCharAt(RANDOM.nextInt(size), '1');
 		}
 
