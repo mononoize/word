@@ -96,7 +96,9 @@ public class Word implements Serializable, Cloneable, Comparable<Word> {
 	}
 	
 	/**
-	 * Returns a new {@code Word} using the given {@code String} value.
+	 * Returns a new {@code Word} using the given {@code String} value. The given string must consist of {@code '0'} and
+	 * {@code '1'} characters. However, it is allowed to group the individual bits into groups using the {@code ' '} and
+	 * {@code '_'} characters.
 	 * 
 	 * @param value The value to be used.
 	 * @return A new {@code Word} using the given {@code String} value.
@@ -104,9 +106,14 @@ public class Word implements Serializable, Cloneable, Comparable<Word> {
 	public static Word of(final String value) {
 		Validate.notNull(value, "The string must not be null.");
 		Validate.notEmpty(value, "The string must not be empty.");
-		Validate.isTrue(StringUtils.containsOnly(value, '0', '1'), "The value contains invalid characters.");
-
-		return new Word(value.length()).setValue(value);
+		Validate.isTrue(StringUtils.containsOnly(value, '0', '1', ' ', '_'), "The string contains invalid characters.");
+		Validate.isTrue(StringUtils.containsAny(value,  '0', '1'), "The string must include at least one '0' or '1' character");
+		
+		String temp = value;
+		temp = StringUtils.remove(temp, ' ');
+		temp = StringUtils.remove(temp, '_');
+		
+		return new Word(temp.length()).setValue(temp);
 	}
 	
 	/**
@@ -368,7 +375,8 @@ public class Word implements Serializable, Cloneable, Comparable<Word> {
 	}
 	
 	/**
-	 * Sets the value.
+	 * Sets the value.  The given string must consist of {@code '0'} and {@code '1'} characters. However, it is allowed
+	 * to group the individual bits into groups using the {@code ' '} and {@code '_'} characters.
 	 * 
 	 * @param value The value to be set.
 	 * @return A reference to this {@code Word}.
@@ -376,13 +384,19 @@ public class Word implements Serializable, Cloneable, Comparable<Word> {
 	public Word setValue(final String value) {
 		Validate.notNull(value, "The string must not be null.");
 		Validate.notEmpty(value, "The string must not be empty.");
-		Validate.isTrue(StringUtils.containsOnly(value, '0', '1'), "The value contains invalid characters.");
-		Validate.isTrue(this.m_size == value.length(), "Different word sizes not allowed.");
+		Validate.isTrue(StringUtils.containsOnly(value, '0', '1', ' ', '_'), "The string contains invalid characters.");
+		Validate.isTrue(StringUtils.containsAny(value,  '0', '1'), "The string must include at least one '0' or '1' character");
+		
+		String temp = value;
+		temp = StringUtils.remove(temp, ' ');
+		temp = StringUtils.remove(temp, '_');
+	
+		Validate.isTrue(this.m_size == temp.length(), "Different word sizes not allowed.");
 		
 		this.clear();
 		
 		for (int i = 0; i < this.m_size; i++) {
-			if (value.charAt((this.m_size - 1 - i)) == '1') {
+			if (temp.charAt((this.m_size - 1 - i)) == '1') {
 				this.set(i);	
 			}
 		}
