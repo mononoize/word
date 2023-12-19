@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
-public class TestWordLogicBits extends AbstractTestWord {
+public class TestWordOperationsBitwise extends AbstractTestWord {
 
 	@Nested
 	@Order(1)
